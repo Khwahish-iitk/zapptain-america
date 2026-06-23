@@ -37,19 +37,14 @@ def _load_via_ffmpeg(path, target_sr):
     most systems, including Streamlit Community Cloud once added via
     packages.txt).
     """
-    ffmpeg_path = shutil.which("ffmpeg")
-    if ffmpeg_path is None:
-        try:
-            import imageio_ffmpeg
-            ffmpeg_path = imageio_ffmpeg.get_ffmpeg_exe()
-        except Exception:
-            raise RuntimeError("ffmpeg not found and imageio-ffmpeg not installed")
+    if shutil.which("ffmpeg") is None:
+        raise RuntimeError("ffmpeg not found on PATH")
 
     with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as tmp:
         tmp_path = tmp.name
     try:
         cmd = [
-            ffmpeg_path, "-y", "-v", "error",
+            "ffmpeg", "-y", "-v", "error",
             "-i", path,
             "-ac", "1",                # mono
             "-ar", str(target_sr),     # resample directly to target rate
@@ -452,6 +447,19 @@ def song_accent_color(name):
                "#34d399", "#fb923c", "#c084fc"]
     h = sum(ord(c) for c in name)
     return palette[h % len(palette)]
+
+
+def display_name(name):
+    """
+    Cosmetic-only fix: the provided song files use underscores where the
+    original titles had apostrophes (e.g. 'Don_t Stop Me Now'), because
+    apostrophes aren't safe in filenames. We never rename the actual files
+    or change the value used for matching/labels -- this only prettifies
+    what's shown on screen, by turning '_' into an apostrophe when it sits
+    between a letter and a common contraction ending.
+    """
+    import re
+    return re.sub(r"(?<=[A-Za-z])_(?=(s|t|ll|ve|re|d|m)\b)", "'", name)
 
 
 def match_query(x, fs, db: FingerprintDB,

@@ -26,7 +26,7 @@ import matplotlib as mpl
 from fingerprint import (
     load_audio, fingerprint_signal, FingerprintDB, build_database,
     match_query_detailed, get_full_song_fingerprint,
-    make_constellation_thumbnail, song_accent_color,
+    make_constellation_thumbnail, song_accent_color, display_name,
 )
 
 DB_PATH = "song_db.pkl"
@@ -313,7 +313,7 @@ def render_song_card_grid(db):
             plt.close(fig)
             st.markdown(f"""
                 <div style="margin-top:-14px; padding-bottom:14px;">
-                  <div class="song-name">{name}</div>
+                  <div class="song-name">{display_name(name)}</div>
                   <div class="song-hashes">{counts[song_id]:,} hashes</div>
                 </div>
             """, unsafe_allow_html=True)
@@ -346,7 +346,7 @@ st.markdown(f"""
     </svg>
   </div>
   <div>
-    <p class="app-title">Zapptain <span class="accent">:</span> America</p>
+    <p class="app-title">Zapptain America</p>
     <p class="app-sub">Signals, Systems &amp; Networks</p>
   </div>
 </div>
@@ -467,7 +467,7 @@ with tab_identify:
             st.markdown(f"""
             <div class="match-card">
               <div class="match-eyebrow">match found</div>
-              <p class="match-title">{res['best_name']}</p>
+              <p class="match-title">{display_name(res['best_name'])}</p>
               <p class="match-score">cluster score <b>{res['cluster_score']:,}</b> &middot; <b>{margin_txt}</b></p>
             </div>
             """, unsafe_allow_html=True)
@@ -483,7 +483,7 @@ with tab_identify:
                 color = TEAL if name == res["best_name"] else TEXT_FAINT
                 rows_html += f"""
                 <div class="candidate-row">
-                  <div class="candidate-name">{name}</div>
+                  <div class="candidate-name">{display_name(name)}</div>
                   <div class="candidate-bar-track">
                     <div class="candidate-bar-fill" style="width:{pct}%; background:{color};"></div>
                   </div>
@@ -522,7 +522,7 @@ with tab_identify:
               <p class="step-title">Where in the song?</p>
               <p class="step-body">The <span class="hl-teal">{len(res['hashes']):,} fingerprint hashes</span>
               were looked up against every indexed track. Below is the full fingerprint of
-              <b>{res['best_name']}</b> reconstructed from the database, each dot a stored hash anchor.
+              <b>{display_name(res['best_name'])}</b> reconstructed from the database, each dot a stored hash anchor.
               The highlighted window is exactly where the query clip sits inside the full song.</p>
             </div>
             """, unsafe_allow_html=True)
