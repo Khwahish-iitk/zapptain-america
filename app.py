@@ -325,7 +325,7 @@ st.markdown(f"""
     </svg>
   </div>
   <div>
-    <p class="app-title">Zapptain<span class="accent">:</span> America</p>
+    <p class="app-title">Zapptain America</p>
     <p class="app-sub">Signals, Systems &amp; Networks &middot; Project Demo</p>
   </div>
 </div>
