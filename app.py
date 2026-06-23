@@ -48,7 +48,7 @@ TEXT = "#e8edec"
 TEXT_MUTED = "#7c8a89"
 TEXT_FAINT = "#4a5654"
 
-st.set_page_config(page_title="Zapptai America", layout="wide",
+st.set_page_config(page_title="EE200: Audio Fingerprinting", layout="wide",
                     initial_sidebar_state="collapsed")
 
 # ----------------------------------------------------------------------
@@ -88,6 +88,14 @@ section[data-testid="stSidebar"] {{ display: none; }}
 .app-sub {{ font-family:'JetBrains Mono', monospace; font-size:11px;
     letter-spacing:0.12em; text-transform:uppercase; color:{TEXT_FAINT}; margin-top:2px;}}
 .app-tagline {{ color:{TEXT_MUTED}; font-size:14.5px; margin-top:10px; }}
+
+.stat-row {{ display:flex; gap:12px; margin: 20px 0 26px 0; flex-wrap:wrap; }}
+.stat-card {{ flex:1; min-width:140px; background:{PANEL}; border:1px solid {PANEL_BORDER};
+    border-radius:10px; padding:14px 18px; }}
+.stat-value {{ font-family:'JetBrains Mono',monospace; font-size:22px; font-weight:700;
+    color:{TEAL}; }}
+.stat-label {{ font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:0.08em;
+    text-transform:uppercase; color:{TEXT_FAINT}; margin-top:4px; }}
 
 .card {{
     background:{PANEL}; border:1px solid {PANEL_BORDER}; border-radius:10px;
@@ -314,6 +322,19 @@ def render_song_card_grid(db):
 # ----------------------------------------------------------------------
 # Header
 # ----------------------------------------------------------------------
+db = get_database()
+
+if not hasattr(db, "_global_stats"):
+    total_entries = sum(len(v) for v in db.hash_table.values())
+    n_songs = len(db.song_names)
+    db._global_stats = {
+        "n_songs": n_songs,
+        "n_hash_keys": len(db.hash_table),
+        "total_entries": total_entries,
+        "avg_per_song": int(round(total_entries / n_songs)) if n_songs else 0,
+    }
+stats = db._global_stats
+
 st.markdown(f"""
 <div class="app-header">
   <div class="app-icon">
@@ -325,14 +346,26 @@ st.markdown(f"""
     </svg>
   </div>
   <div>
-    <p class="app-title">Zapptain America</p>
-    <p class="app-sub">Signals, Systems &amp; Networks &middot; Project Demo</p>
+    <p class="app-title">Zapptain <span class="accent">:</span> America</p>
+    <p class="app-sub">Signals, Systems &amp; Networks</p>
   </div>
 </div>
 <p class="app-tagline">Index a library of songs as spectrogram fingerprints, then identify any short clip against it.</p>
 """, unsafe_allow_html=True)
 
-db = get_database()
+stat_items = [
+    ("songs indexed", f"{stats['n_songs']}"),
+    ("unique hash keys", f"{stats['n_hash_keys']:,}"),
+    ("total hash entries", f"{stats['total_entries']:,}"),
+    ("avg hashes / song", f"{stats['avg_per_song']:,}"),
+]
+stat_cards_html = "".join([
+    f"""<div class="stat-card">
+          <div class="stat-value">{value}</div>
+          <div class="stat-label">{label}</div>
+        </div>""" for label, value in stat_items
+])
+st.markdown(f'<div class="stat-row">{stat_cards_html}</div>', unsafe_allow_html=True)
 
 tab_library, tab_identify, tab_batch = st.tabs(["Library", "Identify", "Batch"])
 
